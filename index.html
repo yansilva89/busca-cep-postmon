@@ -1,0 +1,217 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    .form {
+      width: 40%;
+      margin: 0 auto;
+      margin-top: 50px;
+      background-color: #b5b5b5;
+      font-family: sans-serif;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      color: #fff;
+      margin-top: 50px;
+      /* Animation CSS */
+      animation-name: one;
+      animation-duration: 1.5s; 
+      animation-timing-function: ease-out; 
+      animation-delay: 0;
+      animation-direction: alternate;
+      animation-iteration-count: 0.5s;
+      animation-fill-mode: none;
+      animation-play-state: running;
+    }
+    
+    @keyframes one {
+      0% {
+        transform: scale(.99);
+        margin-top: 0;
+      }
+      25% {
+        margin-top: 12.5px;
+      }
+      50% {
+        margin-top: 25px;
+      }
+      75% {
+        margin-top: 37.5px;
+      }
+      100% {
+        transform: scale(1);
+        margin-top: 50px;
+      }
+    }
+    
+    .form h1 {
+      color: #fff;
+      text-shadow: 1px 1px #6f6f6f;
+    }
+    
+    .form .in {
+      width: 50%;
+      height: 30px;
+      border-radius: 5px;
+      padding: 2px 15px;
+      border: 2px solid transparent;
+    }
+    
+    .form .in:focus {
+      border: 2px solid #a5a5a5;
+      box-shadow: 1px 1px 1px 1px rgba(165, 165, 165, 0.4);
+      outline: none;
+    }
+    
+    .form .button {
+      width: 20%;
+      height: 30px;
+      border-radius: 5px;
+      padding: 2px 15px;
+      margin: 15px 0; 
+      border: 2px solid #a9a7a7;
+      box-shadow: 1px 1px 10px #757474;   
+      color: #5a5a5a;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    
+    .form .button:hover,
+    .form .button:active {
+      background-color: #757575;
+      color: #fff;
+      cursor: pointer;
+    }
+    
+    .form .button:focus {
+      outline: none;
+      border: 2px solid rgba(169, 167, 167, 0.44);
+      box-shadow: 1px 1px 10px #757474;
+    }
+    
+    .form #results {
+      width: 50%;
+      margin: 10px auto;
+      text-align: left;
+      background-color: #fff;
+      padding: 6px 15px;
+      color: #868686;
+      border-radius: 5px;
+      /* Animation CSS */
+      animation-name: stretch;
+      animation-duration: 1.5s; 
+      animation-timing-function: ease-out; 
+      animation-delay: 0;
+      animation-direction: alternate;
+      animation-iteration-count: 0.5s;
+      animation-fill-mode: none;
+      animation-play-state: running;
+    }
+    
+    @keyframes stretch {
+      0% {
+        transform: scale(.99);
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .form #results p {
+      margin: 5px 0;
+      font-size: 14px;
+      font-weight: 300;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="form">
+    <h1>Consulte seu CEP via<br>POSTMON</h1>
+    <form id="form-cep" onsubmit="searchCep()" method="POST">
+      <input class="in" type="text" name="cep" id="cep" placeholder="Digite Seu CEP">
+      <br>
+      <button class="button" type="submit">Buscar</button>
+    </form>
+    
+    <!-- Preloader -->
+    <div id="preloader" style="display: none;">
+      <p>Informações do seu Cep...</p>
+    </div>
+    
+    <!-- Resultados -->
+    <div id="results" style="display: none;"></div>
+
+    <!-- Erros -->
+    <div id="error" style="display: none;"></div>
+  </div>
+  
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- Axios -->
+  <script>      
+    // Função Search CEP
+    function searchCep () {
+      // Inicia Preloader
+      startPreloader()
+      
+      // Busca CEP
+      let cep = document.getElementById('cep').value;      
+      
+      //Axios Ajax
+      axios.get(`http://api.postmon.com.br/v1/cep/${cep}`, {})
+          .then(response => {
+              showResults (response.data)
+          })
+          .catch(error => {
+              // console.log(error)
+              
+              // Exibe o erro
+              document.getElementById('error').style = 'block'
+        
+              // Exibe mensagem do erro
+              document.getElementById('error').innerHTML = 'Erro Inesperado'
+          }).finally(() => endPreloader ())
+      
+      event.preventDefault()
+      }
+    
+    // Função Exibe Resultado (Retorno)
+    function showResults (address) {
+      // Mostra DIV com resultados
+      document.getElementById('results').style.display = 'block'
+      
+      // Limpa Resultados
+      document.getElementById('results').innerHTML = ''
+      
+      // Mostra resultados
+      document.getElementById('results').innerHTML = `
+      <p><b>Bairro: </b> ${address.bairro} </p>
+      <p><b>Cidade: </b> ${address.cidade} </p>
+      <p><b>Logradouro: </b> ${address.logradouro} </p>
+      <p><b>Cep: </b> ${address.cep} </p>
+      `
+    }
+    
+    // Funções Exibe/Não-Exibe Preloader
+    function startPreloader () {
+      // Exibe Preloader
+      document.getElementById('preloader').style.display = 'block'
+      // Oculta Error
+      document.getElementById('error').style.display = 'none'
+    }
+    
+    function endPreloader () {
+      // Não-Exibe Preloader
+      document.getElementById('preloader').style.display = 'none'
+    }
+  </script>
+</body>
+</html>
